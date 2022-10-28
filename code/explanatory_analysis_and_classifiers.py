@@ -78,7 +78,7 @@ def split_data(df):
 # TODO: 
 # why no PCA?
 # Task 2: Set up some classifiers and evaluate them
-# Evaluation: Accuracy, Sensitivity&Sepcificity (why not Precision&Recall?), F1-Score for unbalanced data
+# Evaluation: Accuracy, Sensitivity&Sepcificity (why not Precision&Recall?), please use the F1-Score for unbalanced data
 
 # multiple linear regression 
 def multiple_linear_regression(train, test):
