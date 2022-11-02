@@ -156,6 +156,15 @@ def test_model(model, test_features, test_labels):
     plt.show()
     return pred
 
+def plot_accuracies(models, model_names, train_features, train_labels, test_features, test_labels):
+    # Plot the accuracy of the models in a bar chart
+    # use train and test accuracy for the bar chart (for each model)
+    train_acc = [model.score(train_features, train_labels) for model in models]
+    test_acc = [accuracy_score(test_labels, model.predict(test_features)) for model in models]
+    overall_acc = pd.DataFrame({"Model type": model_names, "Accuracy (Training)": train_acc, "Accuracy (Test)": test_acc})
+    overall_acc.plot.bar(x="Model type", y=["Accuracy (Training)", "Accuracy (Test)"])  # type: ignore
+    plt.show()
+
 # TODO: run it again after binarization of goal 
 # task 3: same again, but all !=0 goal-values are set to 1. No need for F1-Score anymore.
 # makes sense, 'cause binary classification is easier than multi-class classification, if the features tend to be the same for all goal > 1
@@ -175,9 +184,11 @@ def main():
     # replace '?' with None, check for missings, and impute missing values with mean
     df = impute_question_marks(df)
     
-    # use this function for task 3
-    df = set_goal_to_binary(df)
+    # Task 3:
+    # activate this function for task 3 and run the code again
+    #df = set_goal_to_binary(df)
     
+    # Task 1: Data exploration
     # check the data
     check_data(df)
     # check the correlation
@@ -189,6 +200,7 @@ def main():
     # check the pairplot (this takes a while!)
     #check_pairplot(df)
 
+    # Task 2: Set up some classifiers and evaluate them
     train_features, train_labels, test_features, test_labels = get_features_and_labels(df)
 
     # knn classifier
@@ -206,7 +218,12 @@ def main():
     # evaluate the model
     _ = test_model(dec_tree, test_features, test_labels)
 
+    # plot the accuracies of the models
+    models = [knn, logreg, dec_tree]
+    model_names = ["k-NN", "Log. Reg.", "Decision Tree"]
+    plot_accuracies(models, model_names, train_features, train_labels, test_features, test_labels)
 
+    # Task 4: ROC(&AUC?) curves
 
     return df
 
