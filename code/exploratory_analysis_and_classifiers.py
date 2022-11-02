@@ -11,6 +11,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
@@ -98,8 +99,9 @@ def get_features_and_labels(df, features=[], label="goal", use_MM_scaler=True):
     # Scale the data to (0..1)
     if use_MM_scaler:
         scaler = MinMaxScaler()
-        train_df = scaler.fit_transform(train_df)
-        test_df = scaler.transform(test_df)
+        _ = scaler.fit_transform(train_df)
+        train_features = scaler.fit_transform(train_features)
+        test_features = scaler.transform(test_features)
     return train_features, train_labels, test_features, test_labels
 
 # TODO: Plots for the report
@@ -131,6 +133,16 @@ def decision_tree(train_features, train_labels):
     print("--- Model type:", type(dec_tree), " ---")
     print("Accuracy (train): ", dec_tree.score(train_features, train_labels))
     return dec_tree
+
+# neural network
+def neural_network(train_features, train_labels):
+    # not in use for now. wrong hyperparameters. But there exists a neural network in sklearn
+    resnet = MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=1000)
+    resnet.fit(train_features, train_labels)
+    print("--- Model type:", type(resnet), " ---")
+    print("Accuracy (train): ", resnet.score(train_features, train_labels))
+    return resnet
+
 
 def test_model(model, test_features, test_labels):
     # predict the test data
@@ -183,7 +195,6 @@ def main():
 
     # logistic regression
     logreg = logistic_regression(train_features, train_labels)
-
     # evaluate the model
     _ = test_model(logreg, test_features, test_labels)
 
