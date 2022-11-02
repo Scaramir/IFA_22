@@ -160,8 +160,7 @@ def test_model(model, test_features, test_labels):
 # task 3: same again, but all !=0 goal-values are set to 1. No need for F1-Score anymore.
 # makes sense, 'cause binary classification is easier than multi-class classification, if the features tend to be the same for all goal > 1
 def set_goal_to_binary(df):
-    df.goal = df.goal.astype(int)
-    df.goal = df.goal.apply(lambda x: 1 if x!=0 else 0)
+    df.goal = df.goal.apply(lambda x: "1" if x!="0.0" else "0")
     return df
 
 # TODO: 
@@ -175,6 +174,10 @@ def main():
     df = read_data('./../data/processedWithHeader.cleveland.data')
     # replace '?' with None, check for missings, and impute missing values with mean
     df = impute_question_marks(df)
+    
+    # use this function for task 3
+    df = set_goal_to_binary(df)
+    
     # check the data
     check_data(df)
     # check the correlation
@@ -202,6 +205,8 @@ def main():
     dec_tree = decision_tree(train_features, train_labels)
     # evaluate the model
     _ = test_model(dec_tree, test_features, test_labels)
+
+
 
     return df
 
