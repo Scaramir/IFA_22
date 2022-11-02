@@ -7,14 +7,21 @@ import random # for reproducibility
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.linear_model import LogisticRegression, LinearRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 
 
 # set seeds for reproducibility
 def set_seeds(seed = 1129142087):
-    np.random.seed(0)
     random.seed(seed)
-    np.random.seed(seed)
+    np.random.seed(seed+1)
     print('Seeds set to {}.'.format(seed))
     return
 
@@ -38,7 +45,7 @@ def impute_question_marks(df):
 
 # check the data
 def check_data(df):
-    print(df.head())
+    #print(df.head())
     print(df.info())
     print(df.describe())
     return
@@ -57,6 +64,7 @@ def check_dist(df):
 
 # check the pairplot
 def check_pairplot(df):
+    print("Pairplot - all features\n: Warning: This may take a while...") 
     sns.pairplot(df, hue='goal')
     plt.show()
     return
@@ -70,27 +78,71 @@ def check_heatmap(df):
 
 # split the data into train and test
 # return train and test dataframes
-def split_data(df):
-    return train_test_split(df, test_size=0.2)
+def split_data(df, test_size=0.2, random_state=12542068):
+    train_df = df.sample(frac=1-test_size, random_state=random_state)
+    test_df = df.drop(train_df.index)
+    return train_df, test_df
 
-
+def get_features_and_labels(df, features=[], label="goal", use_MM_scaler=True):
+    # split the data into train and test
+    # return train and test dataframes
+    train_df, test_df = split_data(df)
+    if not features:
+        train_features = train_df.drop(columns=label)
+        test_features = test_df.drop(columns=label)
+    else: 
+        train_features = train_df[features]
+        test_features = test_df[features]
+    train_labels = train_df[label]
+    test_labels = test_df[label]
+    # Scale the data to (0..1)
+    if use_MM_scaler:
+        scaler = MinMaxScaler()
+        train_df = scaler.fit_transform(train_df)
+        test_df = scaler.transform(test_df)
+    return train_features, train_labels, test_features, test_labels
 
 # TODO: 
 # why no PCA?
 # Task 2: Set up some classifiers and evaluate them
-# Evaluation: Accuracy, Sensitivity&Sepcificity (why not Precision&Recall?), please use the F1-Score for unbalanced data
-
-# multiple linear regression 
-def multiple_linear_regression(train, test):
-    return 
+# Evaluation as plots: Accuracy, Sensitivity&Sepcificity (aka Precision&Recall?), 
+# NOTE: please use the F1-Score for unbalanced classes 
+def logistic_regression(train_features, train_labels):
+    # apply logistic regression
+    logreg = LogisticRegression()
+    logreg.fit(train_features, train_labels)
+    print("--- Model type:", type(logreg), " ---")
+    print("Accuracy (train): ", logreg.score(train_features, train_labels))
+    return logreg
 
 # k-NN
-def k_nearest_neighbors(train, test):
-    return
+def k_nearest_neighbors(train_features, train_labels):
+    # apply k-nn
+    knn = KNeighborsClassifier(n_neighbors=5)
+    knn.fit(train_features, train_labels)
+    print("--- Model type:", type(knn), " ---")
+    print("Accuracy (train): ", knn.score(train_features, train_labels))
+    return knn
 
 # decision tree
-def decision_tree(train, test):
-    return
+def decision_tree(train_features, train_labels):
+    dec_tree = DecisionTreeClassifier()
+    dec_tree.fit(train_features, train_labels)
+    print("--- Model type:", type(dec_tree), " ---")
+    print("Accuracy (train): ", dec_tree.score(train_features, train_labels))
+    return dec_tree
+
+def test_model(model, test_features, test_labels):
+    # predict the test data
+    pred = model.predict(test_features)
+    # evaluate the model
+    print("Accuracy (test): ", accuracy_score(test_labels, pred))
+    print("Confusion Matrix: ", confusion_matrix(test_labels, pred))
+    print("Classification Report: ", classification_report(test_labels, pred))
+    # heatmap of confusion matrix
+    sns.heatmap(confusion_matrix(test_labels, pred), annot=True, fmt='d')
+    plt.show()
+    return pred
 
 # TODO: 
 # task 3: same again, but all !=0 goal-values are set to 1. No need for F1-Score anymore.
@@ -112,8 +164,27 @@ def main():
     check_dist(df)
     # check the heatmap
     check_heatmap(df)
-    # check the pairplot
-    check_pairplot(df)
+    # check the pairplot (this takes a while!)
+    #check_pairplot(df)
+
+    train_features, train_labels, test_features, test_labels = get_features_and_labels(df)
+
+    # knn classifier
+    knn = k_nearest_neighbors(train_features, train_labels)
+    # evaluate the model
+    _ = test_model(knn, test_features, test_labels)
+
+    # logistic regression
+    logreg = logistic_regression(train_features, train_labels)
+
+    # evaluate the model
+    _ = test_model(logreg, test_features, test_labels)
+
+    # decision tree
+    dec_tree = decision_tree(train_features, train_labels)
+    # evaluate the model
+    _ = test_model(dec_tree, test_features, test_labels)
+
     return df
 
 
