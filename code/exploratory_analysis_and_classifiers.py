@@ -102,7 +102,7 @@ def get_features_and_labels(df, features=[], label="goal", use_MM_scaler=True):
         test_df = scaler.transform(test_df)
     return train_features, train_labels, test_features, test_labels
 
-# TODO: 
+# TODO: Plots for the report
 # why no PCA?
 # Task 2: Set up some classifiers and evaluate them
 # Evaluation as plots: Accuracy, Sensitivity&Sepcificity (aka Precision&Recall?), 
@@ -137,15 +137,22 @@ def test_model(model, test_features, test_labels):
     pred = model.predict(test_features)
     # evaluate the model
     print("Accuracy (test): ", accuracy_score(test_labels, pred))
-    print("Confusion Matrix: ", confusion_matrix(test_labels, pred))
-    print("Classification Report: ", classification_report(test_labels, pred))
+    print("Confusion Matrix: \n", confusion_matrix(test_labels, pred))
+    print("Classification Report: \n", classification_report(test_labels, pred))
     # heatmap of confusion matrix
     sns.heatmap(confusion_matrix(test_labels, pred), annot=True, fmt='d')
     plt.show()
     return pred
 
-# TODO: 
+# TODO: run it again after binarization of goal 
 # task 3: same again, but all !=0 goal-values are set to 1. No need for F1-Score anymore.
+# makes sense, 'cause binary classification is easier than multi-class classification, if the features tend to be the same for all goal > 1
+def set_goal_to_binary(df):
+    df.goal = df.goal.astype(int)
+    df.goal = df.goal.apply(lambda x: 1 if x!=0 else 0)
+    return df
+
+# TODO: 
 # task 4: ROC(&AUC?) curves
 # task 5: Report and presentation 
 
@@ -153,7 +160,7 @@ def test_model(model, test_features, test_labels):
 # main function
 def main():
     # read the data
-    df = read_data('./../data\processedWithHeader.cleveland.data')
+    df = read_data('./../data/processedWithHeader.cleveland.data')
     # replace '?' with None, check for missings, and impute missing values with mean
     df = impute_question_marks(df)
     # check the data
