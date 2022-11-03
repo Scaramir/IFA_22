@@ -183,11 +183,24 @@ def plot_recall(models, model_names, test_features, test_labels):
     overall_recall.plot.bar(x="Model type", y="Recall")  # type: ignore
     plt.show()
 
+def plot_acc_prec_rec(models, model_names, train_features, train_labels, test_features, test_labels):
+    # Plot the accuracy, precision and recall of the models in a bar chart
+    # use train and test accuracy, precision and recall for the bar chart (for each model)
+    train_acc = [model.score(train_features, train_labels) for model in models]
+    test_acc = [accuracy_score(test_labels, model.predict(test_features)) for model in models]
+    precision = [precision_score(test_labels, model.predict(test_features), average="weighted") for model in models]
+    recall = [recall_score(test_labels, model.predict(test_features), average="weighted") for model in models]
+    overall_acc_prec_rec = pd.DataFrame({"Model type": model_names, "Accuracy (Training)": train_acc, "Accuracy (Test)": test_acc, "Precision (Test)": precision, "Recall (Test)": recall})
+    overall_acc_prec_rec.plot.bar(x="Model type", y=["Accuracy (Training)", "Accuracy (Test)", "Precision (Test)", "Recall (Test)"])  # type: ignore
+    plt.show()
+
 def roc_auc(models, model_names, test_features, test_labels):
     # Plot a ROC curve for each model (use test data) 
     # Add the AUC to the plot
     for model in tqdm(models, desc="Plotting ROC-AUC"):
         plot_roc_curve(model, test_features, test_labels)
+        # Add the model name to the plot
+        plt.title(model_names[models.index(model)])
         plt.show()
 
 
@@ -199,8 +212,6 @@ def set_goal_to_binary(df):
     df.goal = df.goal.astype("int")
     return df
 
-# TODO: 
-# task 4: ROC(&AUC?) curves
 # task 5: Report and presentation 
 
 # ------------------ main ------------------
@@ -210,14 +221,16 @@ if __name__ == '__main__':
     df = read_data('./../data/processedWithHeader.cleveland.data')
     # replace '?' with None, check for missings, and impute missing values with mean
     df = impute_question_marks(df)
+    print("Missing values: got imputed with mean values")
     
     # Task 3:
-    # activate this function for task 3 and run the code again
+    # Set this to 'True' for task 3 and run the whole code again
     binary_outcome=True
     if binary_outcome:
         df = set_goal_to_binary(df)
     
     # Task 1: Data exploration
+    print("-----Task 1: Data exploration-----")
     # check the data
     check_data(df)
     # check the correlation
@@ -227,9 +240,10 @@ if __name__ == '__main__':
     # check the heatmap
     check_heatmap(df)
     # check the pairplot (this takes a while!)
-    #check_pairplot(df)
+    check_pairplot(df)
 
     # Task 2: Set up some classifiers and evaluate them
+    print("-----Task 2: Set up some classifiers and evaluate them-----")
     train_features, train_labels, test_features, test_labels = get_features_and_labels(df)
 
     # knn classifier
@@ -250,18 +264,23 @@ if __name__ == '__main__':
     # plot the accuracies of the models
     models = [knn, logreg, dec_tree]
     model_names = ["k-NN", "Log. Reg.", "Decision Tree"]
-    plot_accuracies(models, model_names, train_features, train_labels, test_features, test_labels)
-
+    #plot_accuracies(models, model_names, train_features, train_labels, test_features, test_labels)
     # plot the precision of the models
-    plot_precision(models, model_names, test_features, test_labels)
-
+    #plot_precision(models, model_names, test_features, test_labels)
     # plot the recall of the models
-    plot_recall(models, model_names, test_features, test_labels)
+    #plot_recall(models, model_names, test_features, test_labels)
+
+    plot_acc_prec_rec(models, model_names, train_features, train_labels, test_features, test_labels)
 
     # Task 4: ROC curves
+    print("-----Task 4: ROC curves for a binary outcome-----")
     # plot the ROC-AUC of the models
     if binary_outcome:
         roc_auc(models, model_names, test_features, test_labels)
+
+    # Task 5: Set up a report-template
+    print("-----Task 5: Overleaf-Template is set up-----")
+
 
 
 
