@@ -1,3 +1,4 @@
+#from __future__ import print_function, division
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -13,10 +14,11 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, precision_score, recall_score, plot_roc_curve
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 
 
 # set seeds for reproducibility
@@ -65,7 +67,7 @@ def check_dist(df):
 
 # check the pairplot
 def check_pairplot(df):
-    print("Pairplot - all features\n: Warning: This may take a while...") 
+    print("Pairplot - all features:\n Warning: This may take a while...\n Note: No need for histograms, because they are included in the pairplot (diagonal)") 
     sns.pairplot(df, hue='goal')
     plt.show()
     return
@@ -104,8 +106,8 @@ def get_features_and_labels(df, features=[], label="goal", use_MM_scaler=True):
         test_features = scaler.transform(test_features)
     return train_features, train_labels, test_features, test_labels
 
-# TODO: Plots for the report
-# why no PCA?
+# why no PCA? I mean, srsly?! i would be a great introduction to the data, 
+# but with low correlation comes lower interpretability of pcas, or something like that. 
 # Task 2: Set up some classifiers and evaluate them
 # Evaluation as plots: Accuracy, Sensitivity&Sepcificity (aka Precision&Recall?), 
 # NOTE: please use the F1-Score for unbalanced classes 
@@ -137,7 +139,7 @@ def decision_tree(train_features, train_labels):
 # neural network
 def neural_network(train_features, train_labels):
     # not in use for now. wrong hyperparameters. But there exists a neural network in sklearn
-    resnet = MLPClassifier(hidden_layer_sizes=(100, 100, 100), max_iter=1000)
+    resnet = MLPClassifier(hidden_layer_sizes=(32, 32, 16), max_iter=100)
     resnet.fit(train_features, train_labels)
     print("--- Model type:", type(resnet), " ---")
     print("Accuracy (train): ", resnet.score(train_features, train_labels))
@@ -165,11 +167,36 @@ def plot_accuracies(models, model_names, train_features, train_labels, test_feat
     overall_acc.plot.bar(x="Model type", y=["Accuracy (Training)", "Accuracy (Test)"])  # type: ignore
     plt.show()
 
+def plot_precision(models, model_names, test_features, test_labels):
+    # Plot the precision of the models in a bar chart
+    # use test precision for the bar chart (for each model)
+    precision = [precision_score(test_labels, model.predict(test_features), average="weighted") for model in models]
+    overall_precision = pd.DataFrame({"Model type": model_names, "Precision": precision})
+    overall_precision.plot.bar(x="Model type", y="Precision")  # type: ignore
+    plt.show()
+
+def plot_recall(models, model_names, test_features, test_labels):
+    # Plot the recall of the models in a bar chart
+    # use test recall for the bar chart (for each model)
+    recall = [recall_score(test_labels, model.predict(test_features), average="weighted") for model in models]
+    overall_recall = pd.DataFrame({"Model type": model_names, "Recall": recall})
+    overall_recall.plot.bar(x="Model type", y="Recall")  # type: ignore
+    plt.show()
+
+def roc_auc(models, model_names, test_features, test_labels):
+    # Plot a ROC curve for each model (use test data) 
+    # Add the AUC to the plot
+    for model in tqdm(models, desc="Plotting ROC-AUC"):
+        plot_roc_curve(model, test_features, test_labels)
+        plt.show()
+
+
 # TODO: run it again after binarization of goal 
 # task 3: same again, but all !=0 goal-values are set to 1. No need for F1-Score anymore.
 # makes sense, 'cause binary classification is easier than multi-class classification, if the features tend to be the same for all goal > 1
 def set_goal_to_binary(df):
     df.goal = df.goal.apply(lambda x: "1" if x!="0.0" else "0")
+    df.goal = df.goal.astype("int")
     return df
 
 # TODO: 
@@ -178,7 +205,7 @@ def set_goal_to_binary(df):
 
 # ------------------ main ------------------
 # main function
-def main():
+if __name__ == '__main__':
     # read the data
     df = read_data('./../data/processedWithHeader.cleveland.data')
     # replace '?' with None, check for missings, and impute missing values with mean
@@ -186,7 +213,9 @@ def main():
     
     # Task 3:
     # activate this function for task 3 and run the code again
-    #df = set_goal_to_binary(df)
+    binary_outcome=True
+    if binary_outcome:
+        df = set_goal_to_binary(df)
     
     # Task 1: Data exploration
     # check the data
@@ -206,28 +235,35 @@ def main():
     # knn classifier
     knn = k_nearest_neighbors(train_features, train_labels)
     # evaluate the model
-    _ = test_model(knn, test_features, test_labels)
+    knn_pred = test_model(knn, test_features, test_labels)
 
     # logistic regression
     logreg = logistic_regression(train_features, train_labels)
     # evaluate the model
-    _ = test_model(logreg, test_features, test_labels)
+    logreg_pred = test_model(logreg, test_features, test_labels)
 
     # decision tree
     dec_tree = decision_tree(train_features, train_labels)
     # evaluate the model
-    _ = test_model(dec_tree, test_features, test_labels)
+    dec_tree_pred = test_model(dec_tree, test_features, test_labels)
 
     # plot the accuracies of the models
     models = [knn, logreg, dec_tree]
     model_names = ["k-NN", "Log. Reg.", "Decision Tree"]
     plot_accuracies(models, model_names, train_features, train_labels, test_features, test_labels)
 
-    # Task 4: ROC(&AUC?) curves
+    # plot the precision of the models
+    plot_precision(models, model_names, test_features, test_labels)
 
-    return df
+    # plot the recall of the models
+    plot_recall(models, model_names, test_features, test_labels)
+
+    # Task 4: ROC curves
+    # plot the ROC-AUC of the models
+    if binary_outcome:
+        roc_auc(models, model_names, test_features, test_labels)
 
 
-from __future__ import print_function, division
-if __name__ == '__main__':
-    df = main()
+
+
+
