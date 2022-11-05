@@ -194,6 +194,8 @@ def plot_acc_prec_rec(models, model_names, train_features, train_labels, test_fe
     overall_acc_prec_rec.plot.bar(x="Model type", y=["Accuracy (Training)", "Accuracy (Test)", "Precision (Test)", "Recall (Test)"])  # type: ignore
     plt.show()
 
+# TODO: all ROC-Curves in one plot! 
+# -> for the report 
 def roc_auc(models, model_names, test_features, test_labels):
     # Plot a ROC curve for each model (use test data) 
     # Add the AUC to the plot
@@ -264,11 +266,11 @@ if __name__ == '__main__':
     # plot the accuracies of the models
     models = [knn, logreg, dec_tree]
     model_names = ["k-NN", "Log. Reg.", "Decision Tree"]
-    #plot_accuracies(models, model_names, train_features, train_labels, test_features, test_labels)
+    plot_accuracies(models, model_names, train_features, train_labels, test_features, test_labels)
     # plot the precision of the models
-    #plot_precision(models, model_names, test_features, test_labels)
+    plot_precision(models, model_names, test_features, test_labels)
     # plot the recall of the models
-    #plot_recall(models, model_names, test_features, test_labels)
+    plot_recall(models, model_names, test_features, test_labels)
 
     plot_acc_prec_rec(models, model_names, train_features, train_labels, test_features, test_labels)
 
