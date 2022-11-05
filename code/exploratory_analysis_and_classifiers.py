@@ -200,7 +200,7 @@ def roc_auc(models, model_names, test_features, test_labels):
     # Plot a ROC curve for each model (use test data) 
     # Add the AUC to the plot
     for model in tqdm(models, desc="Plotting ROC-AUC"):
-        plot_roc_curve(model, test_features, test_labels)
+        plot_roc_curve(model, test_features, test_labels) # type: ignore
         # Add the model name to the plot
         plt.title(model_names[models.index(model)])
         plt.show()
@@ -242,7 +242,7 @@ if __name__ == '__main__':
     # check the heatmap
     check_heatmap(df)
     # check the pairplot (this takes a while!)
-    check_pairplot(df)
+    #check_pairplot(df)
 
     # Task 2: Set up some classifiers and evaluate them
     print("-----Task 2: Set up some classifiers and evaluate them-----")
