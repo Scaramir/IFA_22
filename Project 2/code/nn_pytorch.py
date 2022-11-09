@@ -6,9 +6,9 @@ date: 2022-11-08
 """
 
 #-----------Hyperparameters-----------
-use_normalize = True
+use_normalize = False
 pic_folder_path = 'S:/studium/data_for_nns/mkfold/fold1'
-learning_rate = 0.1
+learning_rate = 0.03
 batch_size = 20
 num_epochs = 3
 num_classes = 2
@@ -18,7 +18,8 @@ pretrained = True
 reset_classifier_with_custom_layers = True
 train_network = True
 evaluate_network = True
-model_type = 'resnet50'
+model_type = 'resnet18'
+model_type = 'vgg16'
 output_model_path = './../models/'
 output_model_name = 'model_1'
 #----------------------------------
@@ -78,7 +79,7 @@ if use_normalize:
 data_transforms = {
     "train": transforms.Compose([
         transforms.Resize((224, 224)),
-        transforms.RandomRotation(degrees=(-40, 40)),
+        transforms.RandomRotation(degrees=(-20, 20)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
         transforms.ToTensor()
