@@ -7,7 +7,7 @@ date: 2022-11-08
 
 #-----------Hyperparameters-----------
 use_normalize = False
-pic_folder_path = './data/fold1/'
+pic_folder_path = 'S:/studium/data_for_nns/mkfold/fold1'
 learning_rate = 0.01
 batch_size = 15
 num_epochs = 1
@@ -16,8 +16,8 @@ num_channels = 3
 load_trained_model = False
 pretrained = True
 reset_classifier_with_custom_layers = True
-train_network = False
-evaluate_network = False
+train_network = True
+evaluate_network = True
 model_type = 'resnet50'
 output_model_path = './../models/'
 output_model_name = 'model_1'
@@ -77,14 +77,14 @@ if use_normalize:
 # Data augmentation and normalization for training
 data_transforms = {
     "train": transforms.Compose([
-        transforms.Resize(224),
+        transforms.Resize((224, 224)),
         transforms.RandomRotation(degrees=(-40, 40)),
         transforms.RandomHorizontalFlip(),
         transforms.RandomVerticalFlip(),
         transforms.ToTensor()
     ]),
     "test": transforms.Compose([
-        transforms.Resize(224),
+        transforms.Resize((224, 224)),
         transforms.ToTensor()
     ]),
 }
@@ -148,7 +148,7 @@ def get_model(model_type, load_trained_model, reset_classifier_with_custom_layer
             return None
 
     if reset_classifier_with_custom_layers:
-        model.logits = nn.Sequential(nn.Linear(model.final_shape[0], 256),
+        model.fc = nn.Sequential(nn.Linear(model.fc.in_features, 256),
                                     nn.Dropout(p=0.4, inplace=True),
                                     nn.Linear(256, 100),
                                     nn.ReLU(inplace=True),
@@ -156,14 +156,14 @@ def get_model(model_type, load_trained_model, reset_classifier_with_custom_layer
     model = model.to(device)
     print("Done.")
     return model
-model = get_model(model_type='resnet18', load_trained_model=False, reset_classifier_with_custom_layers=True, num_classes=num_classes, pretrained=True, device='cuda', input_model_path=None, input_model_name=None)
+model = get_model(model_type='resnet50', load_trained_model=False, reset_classifier_with_custom_layers=True, num_classes=num_classes, pretrained=True, device='cuda', input_model_path=None, input_model_name=None)
 
 criterion = nn.CrossEntropyLoss()
 # SGD optimizer with momentum could lead faster to good results, but Adam is more stable
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
-model = train_nn(model, criterion, optimizer, exp_lr_scheduler, num_epochs=num_epochs, device=device, dataloaders=dataloaders, dataset_sizes=dataset_sizes, class_names=class_names, save_model=True, save_model_path=output_model_path, save_model_name=output_model_name)
+train_nn(model, dataloaders, dataset_sizes, criterion, optimizer, exp_lr_scheduler, output_model_path, output_model_name, num_epochs=num_epochs)
 
 
 # TODO: Evaluation of 3 different networks. Use Sigmoid and max to get the probabilities for each of the binary classes.
@@ -175,7 +175,7 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
     # plot the confusion matrix with the older heatmap function from project 1. 
     # plot the ROC curve with the function from project 1
     
-    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=batch_size,
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
                     shuffle=False, num_workers=0)
                     for x in ["train", "test"]}
 
@@ -188,10 +188,10 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
     model.eval()
     
     if device == "cuda":
-        model.cuda.empty_cache()
+        torch.cuda.empty_cache()
     
     with torch.no_grad():
-        for i, (inputs, labels) in enumerate(tqdm(dataloaders[dataset]), desc="Evaluating the model..."):
+        for i, (inputs, labels) in enumerate(tqdm(dataloaders[dataset], desc="Evaluating the model...")):
             inputs = inputs.to(device)
             labels = labels.to(device)
             outputs = model(inputs)
@@ -207,7 +207,7 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
             file_names_list.append(image_datasets[dataset].imgs[i][0].split("/")[-1])
 
     accuracy = num_correct / num_samples
-    loss = criterion(outputs, model)
+    loss = criterion(outputs, labels)
     print("Accuracy: {:.2f} %".format(accuracy * 100))
     print("Loss: {:.2f}".format(loss))
 
@@ -230,6 +230,8 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
         "pred_score": pred_scores_list})
     print("Done.")
     return df
+
+df = evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets, device="cuda", dataset = "test")
 
 # TODO: Plot the results. (Also with a confusion matrix as heatmap?)
 
