@@ -14,8 +14,8 @@ num_epochs = 3
 num_classes = 2
 num_channels = 3
 load_trained_model = False
-pretrained = True
-reset_classifier_with_custom_layers = True
+pretrained = False
+reset_classifier_with_custom_layers = False
 train_network = True
 evaluate_network = True
 model_type = 'resnet18'
@@ -158,7 +158,7 @@ def get_model(model_type, load_trained_model, reset_classifier_with_custom_layer
     model = model.to(device)
     print("Done.")
     return model
-model = get_model(model_type='resnet50', load_trained_model=False, reset_classifier_with_custom_layers=True, num_classes=num_classes, pretrained=pretrained, device=device, input_model_path=None, input_model_name=None)
+model = get_model(model_type=model_type, load_trained_model=False, reset_classifier_with_custom_layers=reset_classifier_with_custom_layers, num_classes=num_classes, pretrained=pretrained, device=device, input_model_path=None, input_model_name=None)
 
 criterion = nn.CrossEntropyLoss()
 # SGD optimizer with momentum could lead faster to good results, but Adam is more stable
