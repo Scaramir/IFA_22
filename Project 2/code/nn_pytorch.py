@@ -6,10 +6,10 @@ date: 2022-11-08
 """
 
 #-----------Hyperparameters-----------
-use_normalize = False
+use_normalize = True
 pic_folder_path = 'S:/studium/data_for_nns/mkfold/fold1'
-learning_rate = 0.01
-batch_size = 15
+learning_rate = 0.1
+batch_size = 20
 num_epochs = 3
 num_classes = 2
 num_channels = 3
@@ -157,11 +157,11 @@ def get_model(model_type, load_trained_model, reset_classifier_with_custom_layer
     model = model.to(device)
     print("Done.")
     return model
-model = get_model(model_type='resnet50', load_trained_model=False, reset_classifier_with_custom_layers=True, num_classes=num_classes, pretrained=True, device='cuda', input_model_path=None, input_model_name=None)
+model = get_model(model_type='resnet50', load_trained_model=False, reset_classifier_with_custom_layers=True, num_classes=num_classes, pretrained=pretrained, device=device, input_model_path=None, input_model_name=None)
 
 criterion = nn.CrossEntropyLoss()
 # SGD optimizer with momentum could lead faster to good results, but Adam is more stable
-optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+optimizer = optim.Adamax(model.parameters(), lr=learning_rate)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
 train_nn(model, dataloaders, dataset_sizes, criterion, optimizer, exp_lr_scheduler, output_model_path, output_model_name, num_epochs=num_epochs)
