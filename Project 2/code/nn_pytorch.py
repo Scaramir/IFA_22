@@ -148,6 +148,7 @@ def get_model(model_type, load_trained_model, reset_classifier_with_custom_layer
             return None
 
     if reset_classifier_with_custom_layers:
+        # TODO: change access to in_features to replace classifier
         model.fc = nn.Sequential(nn.Linear(model.fc.in_features, 256),
                                     nn.Dropout(p=0.4, inplace=True),
                                     nn.Linear(256, 100),
