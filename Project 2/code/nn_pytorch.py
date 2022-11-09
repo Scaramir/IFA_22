@@ -10,7 +10,7 @@ use_normalize = False
 pic_folder_path = 'S:/studium/data_for_nns/mkfold/fold1'
 learning_rate = 0.01
 batch_size = 15
-num_epochs = 1
+num_epochs = 3
 num_classes = 2
 num_channels = 3
 load_trained_model = False
@@ -199,7 +199,7 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
             scores = torch.max(scores, 1)
             pred_scores, pred_labels = scores
 
-            num_correct = torch.sum(pred_labels == labels.data)
+            num_correct += torch.sum(pred_labels == labels.data)
             num_samples += pred_labels.size(0)
             true_labels_list.append(class_names[labels.cpu().detach().numpy()[0]])
             pred_labels_list.append(class_names[pred_labels.cpu().detach().numpy()[0]])
@@ -207,21 +207,21 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
             file_names_list.append(image_datasets[dataset].imgs[i][0].split("/")[-1])
 
     accuracy = num_correct / num_samples
-    loss = criterion(outputs, labels)
+    #loss = criterion(outputs, labels)
     print("Accuracy: {:.2f} %".format(accuracy * 100))
-    print("Loss: {:.2f}".format(loss))
+    #print("Loss: {:.2f}".format(loss))
 
-    print(classification_report(true_labels_list, pred_labels_list, target_names=class_names))
-    conf_mat = confusion_matrix(true_labels_list, pred_labels_list, labels=class_names)
+    print(classification_report(true_labels_list, pred_labels_list))
+    conf_mat = confusion_matrix(true_labels_list, pred_labels_list)
     print(conf_mat)
 
     # plot the confusion matrix
     sns.heatmap(conf_mat, annot=True, fmt='d')
     # plot roc curve
-    plot_roc_curve(model, test_features, test_labels) # type: ignore
+    #plot_roc_curve(model, true_labels_list, pred_labels_list) # type: ignore
     # Add the model name to the plot
-    plt.title(model_type)
-    plt.show()
+    #plt.title(model_type)
+    #plt.show()
 
     df = pd.DataFrame({
         "file_name": file_names_list,
