@@ -8,9 +8,9 @@ date: 2022-11-08
 #-----------Hyperparameters-----------
 use_normalize = False
 pic_folder_path = './data/fold1/'
-learning_rate = 0.001
+learning_rate = 0.01
 batch_size = 15
-num_epochs = 15
+num_epochs = 1
 num_classes = 2
 num_channels = 3
 load_trained_model = False
@@ -18,7 +18,8 @@ pretrained = True
 reset_classifier_with_custom_layers = True
 train_network = False
 evaluate_network = False
-output_model_path = './models/'
+model_type = 'resnet50'
+output_model_path = './../models/'
 output_model_name = 'model_1'
 #----------------------------------
 
@@ -29,7 +30,7 @@ import torch.optim as optim
 from torch.optim import lr_scheduler
 from torchvision import datasets, transforms
 import torchvision.models as models
-from sklearn.metrics import confusion_matrix, classification_report
+from sklearn.metrics import confusion_matrix, classification_report, plot_roc_curve
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -161,7 +162,6 @@ criterion = nn.CrossEntropyLoss()
 # SGD optimizer with momentum could lead faster to good results, but Adam is more stable
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
- 
 
 model = train_nn(model, criterion, optimizer, exp_lr_scheduler, num_epochs=num_epochs, device=device, dataloaders=dataloaders, dataset_sizes=dataset_sizes, class_names=class_names, save_model=True, save_model_path=output_model_path, save_model_name=output_model_name)
 
@@ -212,8 +212,16 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
     print("Loss: {:.2f}".format(loss))
 
     print(classification_report(true_labels_list, pred_labels_list, target_names=class_names))
-    print(confusion_matrix(true_labels_list, pred_labels_list, labels=class_names))
-    
+    conf_mat = confusion_matrix(true_labels_list, pred_labels_list, labels=class_names)
+    print(conf_mat)
+
+    # plot the confusion matrix
+    sns.heatmap(conf_mat, annot=True, fmt='d')
+    # plot roc curve
+    plot_roc_curve(model, test_features, test_labels) # type: ignore
+    # Add the model name to the plot
+    plt.title(model_type)
+    plt.show()
 
     df = pd.DataFrame({
         "file_name": file_names_list,
@@ -222,9 +230,6 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
         "pred_score": pred_scores_list})
     print("Done.")
     return df
-
-
-
 
 # TODO: Plot the results. (Also with a confusion matrix as heatmap?)
 
