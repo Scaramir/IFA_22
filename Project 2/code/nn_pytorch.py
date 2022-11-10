@@ -7,21 +7,22 @@ date: 2022-11-08
 
 #-----------Hyperparameters-----------
 use_normalize = False
-pic_folder_path = 'S:/studium/data_for_nns/mkfold/fold1'
-learning_rate = 0.03
-batch_size = 20
-num_epochs = 3
+pic_folder_path = 'S:/studium/data_for_nns/mkfold/fold2'
+learning_rate = 0.0005
+learning_rate = 0.005
+batch_size = 32
+num_epochs = 5
 num_classes = 2
-num_channels = 3
 load_trained_model = False
 pretrained = False
-reset_classifier_with_custom_layers = False
+reset_classifier_with_custom_layers = True
 train_network = True
 evaluate_network = True
-model_type = 'resnet18'
-model_type = 'vgg16'
+#model_type = 'resnext50_32x4d'
+#model_type = 'resnet18'
+model_type = 'wide_resnet50_2'
 output_model_path = './../models/'
-output_model_name = 'model_1'
+output_model_name = 'model_wide_resnet'
 #----------------------------------
 
 
@@ -43,8 +44,6 @@ import time, random
 from tqdm import tqdm
 from mo_nn_helpers import get_mean_and_std
 from mo_nn_helpers import *
-#from "./../../Project 1/code/exploratory_analysis_and_classifiers.py" import *
-# TODO: __initi__.py file to reuse code from project 1
 
 def get_device():
     if torch.cuda.is_available():
@@ -155,6 +154,11 @@ def get_model(model_type, load_trained_model, reset_classifier_with_custom_layer
                                     nn.Linear(256, 100),
                                     nn.ReLU(inplace=True),
                                     nn.Linear(100, num_classes))
+        model.classifier = nn.Sequential(nn.Linear(model.classifier.in_features, 256),
+                                    nn.Dropout(p=0.4, inplace=True),
+                                    nn.Linear(256, 100),
+                                    nn.ReLU(inplace=True),
+                                    nn.Linear(100, num_classes))
     model = model.to(device)
     print("Done.")
     return model
@@ -162,10 +166,12 @@ model = get_model(model_type=model_type, load_trained_model=False, reset_classif
 
 criterion = nn.CrossEntropyLoss()
 # SGD optimizer with momentum could lead faster to good results, but Adam is more stable
-optimizer = optim.Adamax(model.parameters(), lr=learning_rate)
+#optimizer = optim.Adamax(model.parameters(), lr=learning_rate)
+optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
-train_nn(model, dataloaders, dataset_sizes, criterion, optimizer, exp_lr_scheduler, output_model_path, output_model_name, num_epochs=num_epochs)
+if train_network:
+    train_nn(model, dataloaders, dataset_sizes, criterion, optimizer, exp_lr_scheduler, output_model_path, output_model_name, num_epochs=num_epochs)
 
 
 # TODO: Evaluation of 3 different networks. Use Sigmoid and max to get the probabilities for each of the binary classes.
@@ -179,7 +185,7 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
     
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
                     shuffle=False, num_workers=0)
-                    for x in ["train", "test"]}
+                    for x in [dataset]}
 
     num_samples = 0
     num_correct = 0
@@ -197,9 +203,10 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
             inputs = inputs.to(device)
             labels = labels.to(device)
             outputs = model(inputs)
-            scores = torch.sigmoid(outputs)
-            scores = torch.max(scores, 1)
-            pred_scores, pred_labels = scores
+            #scores = torch.sigmoid(outputs)
+            scores = torch.nn.Softmax(dim=1)(outputs)
+
+            pred_scores, pred_labels = torch.max(scores, 1)
 
             num_correct += torch.sum(pred_labels == labels.data)
             num_samples += pred_labels.size(0)
@@ -208,9 +215,9 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
             pred_scores_list.append(pred_scores.cpu().detach().numpy()[0])
             file_names_list.append(image_datasets[dataset].imgs[i][0].split("/")[-1])
 
-    accuracy = num_correct / num_samples
+    accuracy = 100 * float(num_correct) / num_samples
     #loss = criterion(outputs, labels)
-    print("Accuracy: {:.2f} %".format(accuracy * 100))
+    print("Accuracy: {:.2f} %".format(accuracy))
     #print("Loss: {:.2f}".format(loss))
 
     print(classification_report(true_labels_list, pred_labels_list))
@@ -233,7 +240,8 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
     print("Done.")
     return df
 
-df = evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets, device="cuda", dataset = "test")
+if evaluate_network:
+    df = evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets, device="cuda", dataset = "test")
 
 # TODO: Plot the results. (Also with a confusion matrix as heatmap?)
 
