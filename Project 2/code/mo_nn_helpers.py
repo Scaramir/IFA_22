@@ -148,6 +148,9 @@ def train_nn(model, dataloaders, dataset_sizes, criterion, optimizer, scheduler,
             if phase == "test" and epoch_acc >= best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
+                save_model(model, output_model_path, output_model_name)
+                print(">> Model saved as: ", output_model_name)
+                print(">> Model saved in: ", output_model_path)
         print()
 
     time_elapsed = time.time() - since

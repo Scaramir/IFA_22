@@ -8,7 +8,6 @@ date: 2022-11-08
 #-----------Hyperparameters-----------
 use_normalize = False
 pic_folder_path = 'S:/studium/data_for_nns/mkfold/fold2'
-learning_rate = 0.0005
 learning_rate = 0.005
 batch_size = 32
 num_epochs = 5
