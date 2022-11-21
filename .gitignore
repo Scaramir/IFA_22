@@ -3,3 +3,6 @@ Project 2/models/model_1.pt
 Project 2/code/__pycache__/mo_nn_helpers.cpython-38.pyc
 Project 2/models/model_wide_resnet.pt
 Project 2/models/model_resnext.pt
+Project 2/models/model_wide_resnet_2.pt
+Project 2/models/model_resnet_18.pt
+Project 2/models/model_resnext50_2.pt

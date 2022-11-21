@@ -6,22 +6,31 @@ date: 2022-11-08
 """
 
 #-----------Hyperparameters-----------
-use_normalize = False
+use_normalize = True
 pic_folder_path = 'S:/studium/data_for_nns/mkfold/fold2'
-learning_rate = 0.005
+learning_rate = 0.0005
 batch_size = 32
+num_epochs = 15
 num_epochs = 5
 num_classes = 2
-load_trained_model = False
-pretrained = False
-reset_classifier_with_custom_layers = True
-train_network = True
+load_trained_model = True
+pretrained = True  # transfer learning
+reset_classifier_with_custom_layers = False
+train_network = False
 evaluate_network = True
-#model_type = 'resnext50_32x4d'
+
+# all three are residual networks with a different architecture (-> images from google for visualization)
 #model_type = 'resnet18'
+#model_type = 'resnext50_32x4d'
 model_type = 'wide_resnet50_2'
+
+input_model_path = './../models'
+input_model_name = "model_resnet_18"
+
 output_model_path = './../models/'
-output_model_name = 'model_wide_resnet'
+output_model_name = 'model_wide_resnet_2'
+#output_model_name = 'model_resnext50_2'
+#output_model_name = 'model_resnet_18'
 #----------------------------------
 
 
@@ -153,20 +162,20 @@ def get_model(model_type, load_trained_model, reset_classifier_with_custom_layer
                                     nn.Linear(256, 100),
                                     nn.ReLU(inplace=True),
                                     nn.Linear(100, num_classes))
-        model.classifier = nn.Sequential(nn.Linear(model.classifier.in_features, 256),
-                                    nn.Dropout(p=0.4, inplace=True),
-                                    nn.Linear(256, 100),
-                                    nn.ReLU(inplace=True),
-                                    nn.Linear(100, num_classes))
+        #model.classifier = nn.Sequential(nn.Linear(model.classifier.in_features, 256),
+        #                            nn.Dropout(p=0.4, inplace=True),
+        #                            nn.Linear(256, 100),
+        #                            nn.ReLU(inplace=True),
+        #                            nn.Linear(100, num_classes))
     model = model.to(device)
     print("Done.")
     return model
-model = get_model(model_type=model_type, load_trained_model=False, reset_classifier_with_custom_layers=reset_classifier_with_custom_layers, num_classes=num_classes, pretrained=pretrained, device=device, input_model_path=None, input_model_name=None)
+model = get_model(model_type=model_type, load_trained_model=load_trained_model, reset_classifier_with_custom_layers=reset_classifier_with_custom_layers, num_classes=num_classes, pretrained=pretrained, device=device, input_model_path=input_model_path, input_model_name=input_model_name)
 
 criterion = nn.CrossEntropyLoss()
 # SGD optimizer with momentum could lead faster to good results, but Adam is more stable
-#optimizer = optim.Adamax(model.parameters(), lr=learning_rate)
-optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
+optimizer = optim.Adamax(model.parameters(), lr=learning_rate)
+#optimizer = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
 exp_lr_scheduler = lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.1)
 
 if train_network:
@@ -224,12 +233,11 @@ def evaluate_model(model, dataset_sizes, criterion, class_names, image_datasets,
     print(conf_mat)
 
     # plot the confusion matrix
-    sns.heatmap(conf_mat, annot=True, fmt='d')
-    # plot roc curve
-    #plot_roc_curve(model, true_labels_list, pred_labels_list) # type: ignore
-    # Add the model name to the plot
-    #plt.title(model_type)
-    #plt.show()
+    plt.clf()
+    sns.heatmap(conf_mat, annot=True, fmt='d', xticklabels=class_names, yticklabels=class_names)
+    plt.title("Confusion matrix - " + input_model_name)
+    plt.show()
+
 
     df = pd.DataFrame({
         "file_name": file_names_list,
