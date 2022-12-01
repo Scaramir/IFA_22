@@ -242,7 +242,7 @@ if __name__ == '__main__':
     # check the heatmap
     check_heatmap(df)
     # check the pairplot (this takes a while!)
-    #check_pairplot(df)
+    check_pairplot(df)
 
     # Task 2: Set up some classifiers and evaluate them
     print("-----Task 2: Set up some classifiers and evaluate them-----")

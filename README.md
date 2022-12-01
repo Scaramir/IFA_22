@@ -1,6 +1,6 @@
 # IFA-2022
 
-## Group 9 
+## Group 8
 Florian Herzler, Dominik Bannwitz, Mariana Steffens, Maximilian Otto
 
 ## Report
