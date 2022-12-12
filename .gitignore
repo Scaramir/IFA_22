@@ -1,15 +1,19 @@
-
-Project 2/models/model_1.pt
 Project 2/code/__pycache__/mo_nn_helpers.cpython-38.pyc
-Project 2/models/model_wide_resnet.pt
-Project 2/models/model_resnext.pt
-Project 2/models/model_wide_resnet_2.pt
-Project 2/models/model_resnet_18.pt
-Project 2/models/model_resnext50_2.pt
+complex_systems/week2/__pycache__/Exc2Task1.cpython-38.pyc
+complex_systems/week2/__pycache__/Exc2Task2.cpython-38.pyc
+complex_systems/week3/aufgabe_1.py
+complex_systems/week3/Task1aTraj_w.txt
+complex_systems/week3/ErrorTask1b_w.txt
 Project 1/.gitkeep
 Project 1/code/.gitkeep
 Project 1/data/.gitkeep
 Project 1/results/.gitkeep
 Project 1/seminar_1/.gitkeep
 Project 2/.gitkeep
+Project 2/models/model_1.pt
+Project 2/models/model_resnet_18.pt
+Project 2/models/model_resnext.pt
+Project 2/models/model_resnext50_2.pt
+Project 2/models/model_wide_resnet_2.pt
+Project 2/models/model_wide_resnet.pt
 report/.gitkeep

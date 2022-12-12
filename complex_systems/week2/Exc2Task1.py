@@ -5,104 +5,101 @@ Homework 2
 
 from numpy import dtype
 import numpy as np
-import matplotlib.pyplot as plt
-input = np.loadtxt('Input.txt')
+from tqdm import tqdm
+input = np.loadtxt("Input.txt")
 np.random.seed(seed=int(input[0]))
 nrSimulations = int(input[1])
 
-t_final = 10.0
-lam = 1e-4
+time_max = 10.0
+lamdba = 1e-4
 delta = 1e-8
 beta = 5e-5
 k_r = 0.3
 
-X = np.array([[lam/delta],
-              [20],
-              [0],
-              [0]])
+x_initial_state = np.array([[lamdba/delta],
+                            [20],
+                            [0],
+                            [0]])
 
 #   r1  r2  r3  r4  r5  r6
 #X1  1  -1  -1   0   0   0
 #X2  0   0   1  -1  -1   0
 #X3  0   0   0   0   1  -1
 #X4  0   0   0   1   0   0
-stochiometry = np.array([[1,-1,-1, 0, 0, 0],
+stochiometry_matrix = np.array([[1,-1,-1, 0, 0, 0],
                          [0, 0, 1,-1,-1, 0],
                          [0, 0, 0, 0, 1,-1],
                          [0, 0, 0, 1, 0, 0]])
 
-def propensities(X,lam,delta,beta,k_r):
-    prop_vec = [lam,
-                X[0] * delta,
-                X[0] * X[1] * beta,
-                X[1] * 3e7 * delta,
-                X[1] * k_r,
-                X[2] * delta]
+def propensities(x_states,lamdba,delta,beta,k_r):
+    prop_vec = [lamdba,
+                x_states[0] * delta,
+                x_states[0] * x_states[1] * beta,
+                x_states[1] * 3e7 * delta,
+                x_states[1] * k_r,
+                x_states[2] * delta]
     return prop_vec
 
-def Time_To_Next_Reaction(lam):
+def time_to_next_reaction(lamdba):
     """
-    @brief The function samples from an exponential distribution
-    @param lam : real value positive.
+    Exp distribution with mean 1/lamdba. `r` is random number between 0 and 1 and != 0.
+    input: lamdba : real value positive.
     """
-
-    #small hack as the numpy uniform random number includes 0
     r = np.random.rand()
     while r==0:
         r = np.random.rand()
-    return (1.0/lam)*np.log(1.0/r)
+    return (1.0/lamdba)*np.log(1.0/r)
 
-def Find_Reaction_Index(a):
+def find_reaction_index(changes):
     """
-    @brief The function takes in the propensity vector and returns ...
-    @param a : Array (num_reaction,1)
+    Propensitiy / reaction vector `changes`. `r` is random number between 0 and 1 and != 0.
+    input: changes : Array (num_reaction,1)
     """
-    #small hack as the numpy random number includes 0
     r = np.random.rand()
     while r == 0:
         r = np.random.rand()
-    return np.sum(np.cumsum(a) < r*np.sum(a))
+    return np.sum(np.cumsum(changes) < r*np.sum(changes))
 
-def SSA(stochiometry,X_0,t_final,lam,delta,beta,k_r):
-    #for storage
-    X_store = []
-    T_store = []
-    #initialize
-    t = 0.0
-    x = X_0
-    X_store.append(x[1,0]) 
-    T_store.append(t)
+def SSA(stochiometry_matrix, x_initial_state, time_max, lamdba, delta, beta, k_r):
+    # keep track of the states and times
+    x0_list = []
+    x1_list = []
+    x2_list = []
+    x3_list = []
+    timestep_list = []
 
-    while t < t_final:
-        a = propensities(x,lam,delta,beta,k_r)
-        #first jump time
-        tau = Time_To_Next_Reaction(np.sum(a))
-        #test if we have jumped too far
-        if (t + tau > t_final) or (np.sum(a) == 0):
-            return np.array(X_store),np.array(T_store)
-        else:
-            #since we have not, we need to find the next reaction
-            t = t + tau
-            j = Find_Reaction_Index(a)
-            x = x + stochiometry[:,[j]]
-            #update our storage
-            X_store.append(x[1,0])
-            T_store.append(t)
+    # initialize states and time
+    current_time = 0.0
+    x = x_initial_state
+    x0_list.append(x[0,0])
+    x1_list.append(x[1,0])
+    x2_list.append(x[2,0])
+    x3_list.append(x[3,0])
+    timestep_list.append(current_time)
+
+    while current_time < time_max:
+        # calculate reaction propensities
+        changes = propensities(x,lamdba,delta,beta,k_r)
+        # add time until next reaction
+        time_skip = time_to_next_reaction(np.sum(changes))
+        # termination condition
+        if (current_time + time_skip > time_max) or (np.sum(changes) == 0):
+            return np.array(x0_list), np.array(x1_list), np.array(x2_list), np.array(x3_list), np.array(timestep_list)
+
+        current_time = current_time + time_skip
+        # update model 
+        j = find_reaction_index(changes)
+        x = x + stochiometry_matrix[:,[j]]
+        # keep track of states and time points
+        x0_list.append(x[0,0])
+        x1_list.append(x[1,0])
+        x2_list.append(x[2,0])
+        x3_list.append(x[3,0])
+        timestep_list.append(current_time)
 
 #to save trajectories
 #Task 1a:
-for i in range(nrSimulations):
-    states, times = SSA(stochiometry, X, t_final, lam, delta, beta, k_r)
-    Output = np.concatenate((np.array(times,ndmin=2),np.array(states,ndmin=2)), axis=0)
-    np.savetxt('Task1Traj'+str(i+1)+'.txt',Output,delimiter = ',',fmt='%1.3f')
-
-#Task 1b:
-X[1] = [2]
-infected = []
-for i in range(1000):
-    states, times = SSA(stochiometry, X, t_final, lam, delta, beta, k_r)
-    infected.append(states[-1])
-#TODO: histogram of states (X[1]) @T=10 (last point)
-plt.hist(infected)
-#TODO: depict probability that 0,...,20 individuals infected
-#TODO: histogram of X[3]
+for i in tqdm(range(nrSimulations), desc='Simulations'):
+    states0, states1, states2, states3, times = SSA(stochiometry_matrix, x_initial_state, time_max, lamdba, delta, beta, k_r)
+    Output = np.concatenate((np.array(times, ndmin=2),np.array(states1, ndmin=2)), axis=0)
+    np.savetxt('Task1Traj'+str(i+1)+'.txt', Output, delimiter = ',', fmt='%1.3f')
