@@ -1,7 +1,4 @@
 # IFA-2022
+Two Data Science projects (ML / DL), and three Complex Systems projects so far. 
 
 ## Group 8
-Florian Herzler, Dominik Bannwitz, Mariana Steffens, Maximilian Otto
-
-## Report
-https://www.overleaf.com/3841368252grmnczvzgbnh
