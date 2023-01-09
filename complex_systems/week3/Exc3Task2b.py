@@ -136,7 +136,7 @@ for num_sim in num_simulations:
     # compute the error between the mean SSAs and the one RK45 trajectories
     error_list.append(calculate_error(states1_list_ssa, states1_list_rk45))
 Output = np.concatenate((np.array(conseccutive_sims, ndmin=2),np.array(error_list, ndmin=2)), axis=0)
-np.savetxt('Task2bError.txt', Output, delimiter = ',', fmt='%1.3f')
+np.savetxt('ErrorTask2a.txt', Output, delimiter = ',', fmt='%1.3f')
 
 
 
