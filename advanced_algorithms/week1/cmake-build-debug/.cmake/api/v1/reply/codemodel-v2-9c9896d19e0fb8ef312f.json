@@ -1,0 +1,201 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						5
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.4"
+					},
+					"projectIndex" : 0,
+					"source" : "."
+				},
+				{
+					"build" : "lib/libdivsufsort",
+					"childIndexes" : 
+					[
+						2,
+						3,
+						4
+					],
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-lib.libdivsufsort-Debug-bd1adee2d43cb4be131b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "2.4.4"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 1,
+					"source" : "lib/libdivsufsort",
+					"targetIndexes" : 
+					[
+						5
+					]
+				},
+				{
+					"build" : "lib/libdivsufsort/pkgconfig",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-lib.libdivsufsort.pkgconfig-Debug-ed6e586123bbf79d97ef.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "2.4.4"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "lib/libdivsufsort/pkgconfig"
+				},
+				{
+					"build" : "lib/libdivsufsort/include",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-lib.libdivsufsort.include-Debug-ca5f4ca1cf7e653d7df9.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "2.4.4"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "lib/libdivsufsort/include"
+				},
+				{
+					"build" : "lib/libdivsufsort/lib",
+					"hasInstallRule" : true,
+					"jsonFile" : "directory-lib.libdivsufsort.lib-Debug-6c8f112bbe552d8f1b29.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "2.4.4"
+					},
+					"parentIndex" : 1,
+					"projectIndex" : 1,
+					"source" : "lib/libdivsufsort/lib",
+					"targetIndexes" : 
+					[
+						0
+					]
+				},
+				{
+					"build" : "src",
+					"jsonFile" : "directory-src-Debug-b6cf2213fc5053b67c22.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.8"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "src",
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"childIndexes" : 
+					[
+						1
+					],
+					"directoryIndexes" : 
+					[
+						0,
+						5
+					],
+					"name" : "ImplementingSearch",
+					"targetIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					]
+				},
+				{
+					"directoryIndexes" : 
+					[
+						1,
+						2,
+						3,
+						4
+					],
+					"name" : "libdivsufsort",
+					"parentIndex" : 0,
+					"targetIndexes" : 
+					[
+						0,
+						5
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 4,
+					"id" : "divsufsort::@24d4db9d366354c67f45",
+					"jsonFile" : "target-divsufsort-Debug-6b7efd168c8be074f783.json",
+					"name" : "divsufsort",
+					"projectIndex" : 1
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "fmindex_construct::@145eef247bfb46b6828c",
+					"jsonFile" : "target-fmindex_construct-Debug-d352bb23e52cb632088a.json",
+					"name" : "fmindex_construct",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "fmindex_search::@145eef247bfb46b6828c",
+					"jsonFile" : "target-fmindex_search-Debug-0d55996e16ec25d497c9.json",
+					"name" : "fmindex_search",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "naive_search::@145eef247bfb46b6828c",
+					"jsonFile" : "target-naive_search-Debug-9b1eecc4a34f559a7d75.json",
+					"name" : "naive_search",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 5,
+					"id" : "suffixarray_search::@145eef247bfb46b6828c",
+					"jsonFile" : "target-suffixarray_search-Debug-f9532c0bf90ddec61749.json",
+					"name" : "suffixarray_search",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "uninstall::@9347103d9af86dc4f56e",
+					"jsonFile" : "target-uninstall-Debug-1437306e8195df1a328e.json",
+					"name" : "uninstall",
+					"projectIndex" : 1
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/dominik/git/ifa-2022/advanced_algorithms/week1/cmake-build-debug",
+		"source" : "/home/dominik/git/ifa-2022/advanced_algorithms/week1"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

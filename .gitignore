@@ -17,3 +17,5 @@ Project 2/models/model_resnext50_2.pt
 Project 2/models/model_wide_resnet_2.pt
 Project 2/models/model_wide_resnet.pt
 report/.gitkeep
+advanced_algorithms/week1/lib/libdivsufsort
+advanced_algorithms/week1/lib/seqan3
